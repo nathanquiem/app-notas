@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { DashboardActions } from './DashboardActions'
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface RecentItem {
     id: string
     title: string
