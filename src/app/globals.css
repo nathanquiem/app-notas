@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-marine: #0f172a;
+  /* Slate 900 */
+  --color-primary: #000000;
+  --color-primary-light: #334155;
+  /* Slate 700 */
+
+  --color-background: #fafafa;
+  /* Zinc 50 */
+  --color-foreground: #09090b;
+  /* Zinc 950 */
+  --color-card: #ffffff;
+  --color-border: #e4e4e7;
+  /* Zinc 200 */
+
+  /* Utilities for the new color palette */
+  --bg-marine: var(--color-marine);
+  --bg-primary: var(--color-primary);
+  --bg-primary-light: var(--color-primary-light);
+}
+
+.dark {
+  --color-marine: #ffffff;
+  --color-primary: #ffffff;
+  --color-primary-light: #d4d4d8;
+
+  --color-background: #09090b;
+  /* Zinc 950 */
+  --color-foreground: #fafafa;
+  /* Zinc 50 */
+  --color-card: #18181b;
+  /* Zinc 900 */
+  --color-border: #27272a;
+  /* Zinc 800 */
+}
+
+@layer base {
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Remove BlockNote default background to blend with the app theme natively */
+  .bn-container[data-color-scheme],
+  .bn-editor,
+  .bn-default-styles {
+    background-color: transparent !important;
+  }
+}
