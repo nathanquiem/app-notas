@@ -1,8 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { updatePasswordContentAction } from "@/app/actions/passwords"
 import { Loader2, Check } from "lucide-react"
+import { BlockNoteEditor, PartialBlock } from "@blocknote/core"
+import { BlockNoteView } from "@blocknote/mantine"
+import { useCreateBlockNote } from "@blocknote/react"
+import "@blocknote/core/fonts/inter.css"
+import "@blocknote/mantine/style.css"
+import { useTheme } from "next-themes"
 
 interface PasswordEditorProps {
     passwordId: string
@@ -10,28 +16,67 @@ interface PasswordEditorProps {
 }
 
 export function PasswordEditor({ passwordId, initialContent }: PasswordEditorProps) {
-    const [content, setContent] = useState(initialContent)
+    const { resolvedTheme } = useTheme()
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState<Date | null>(new Date())
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    useEffect(() => {
-        const handler = setTimeout(async () => {
-            if (content === initialContent) return // Evita salvamento sem mudanças reais desde a carga inicial
-
-            setIsSaving(true)
-            const res = await updatePasswordContentAction(passwordId, content)
-            setIsSaving(false)
-
-            if (res.success) {
-                setLastSaved(new Date())
+    // Tenta parsear o initialContent. Se não for um JSON válido do BlockNote (dados antigos/raw text), 
+    // converte para um array de PartialBlock de texto simples.
+    let parsedInitial: PartialBlock[] | undefined = undefined
+    try {
+        if (initialContent && initialContent.trim() !== "") {
+            const parsed = JSON.parse(initialContent)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                parsedInitial = parsed
+            } else {
+                // Caso seja um JSON mas não array
+                parsedInitial = [{ type: "paragraph", content: initialContent }]
             }
-        }, 1500)
+        }
+    } catch {
+        // Se falhar no parse, significa que era um texto simples legado sem formatação
+        if (initialContent && initialContent.trim() !== "") {
+            // Separa por quebras de linha para manter a formatação visual legada
+            parsedInitial = initialContent.split('\n').map(line => ({
+                type: "paragraph",
+                content: line
+            })) as PartialBlock[]
+        }
+    }
 
-        return () => clearTimeout(handler)
-    }, [content, passwordId, initialContent])
+    // Inicializa o Tiptap / BlockNote
+    const editor = useCreateBlockNote({
+        initialContent: parsedInitial,
+    })
+
+    const saveToDatabase = async (currentBlocks: any[]) => {
+        setIsSaving(true)
+        // Salva o JSON estruturado do BlockNote como string (o servidor cuidará da criptografia disso)
+        const contentString = JSON.stringify(currentBlocks)
+        const res = await updatePasswordContentAction(passwordId, contentString)
+        setIsSaving(false)
+
+        if (res.success) {
+            setLastSaved(new Date())
+        }
+    }
+
+    // Handler de alteração (onChange no BlockNoteView)
+    const handleEditorChange = () => {
+        if (!editor) return
+
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current)
+        }
+
+        saveTimeoutRef.current = setTimeout(() => {
+            saveToDatabase(editor.document)
+        }, 1500)
+    }
 
     return (
-        <div className="w-full h-full flex flex-col pt-2 relative">
+        <div className="w-full h-full flex flex-col pt-2 relative pb-32">
             <div className="absolute -top-10 right-4 flex items-center justify-end text-xs font-medium text-gray-500 gap-2">
                 {isSaving ? (
                     <><Loader2 size={14} className="animate-spin text-orange-500" /> Criptografando...</>
@@ -40,13 +85,25 @@ export function PasswordEditor({ passwordId, initialContent }: PasswordEditorPro
                 ) : null}
             </div>
 
-            <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="DATABASE_PROD&#10;user: admin&#10;password: *******"
-                className="flex-1 w-full bg-slate-900 text-green-400 p-6 rounded-xl font-mono text-sm sm:text-base resize-none focus:outline-none focus:ring-2 focus:ring-orange-500/50 leading-relaxed shadow-inner"
-                spellCheck={false}
-            />
+            <div className="flex-1 w-full bg-slate-900 border border-slate-800/50 rounded-xl overflow-y-auto shadow-inner pt-4">
+                <BlockNoteView
+                    editor={editor}
+                    theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
+                    className="min-h-[500px] password-vault-editor"
+                    onChange={handleEditorChange}
+                />
+            </div>
+            {/* Customizamos um pouco o CSS pra que o texto padrão continue verde para manter a identidade do Cofre */}
+            <style jsx global>{`
+                .password-vault-editor .bn-editor p {
+                    color: #4ade80 !important; /* Tailwind green-400 */
+                    font-family: monospace;
+                }
+                /* Mas preservamos cores explicitamente escolhidas pelo usuário */
+                .password-vault-editor .bn-editor span[style*="color"] {
+                    color: inherit !important;
+                }
+            `}</style>
         </div>
     )
 }
