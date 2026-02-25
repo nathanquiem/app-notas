@@ -85,7 +85,7 @@ export function PasswordEditor({ passwordId, initialContent }: PasswordEditorPro
                 ) : null}
             </div>
 
-            <div className="flex-1 w-full bg-[#050505] border border-green-500/20 rounded-xl overflow-y-auto shadow-inner pt-4">
+            <div className="flex-1 w-full bg-[#050505] border border-blue-500/30 rounded-xl overflow-y-auto shadow-inner pt-4">
                 <BlockNoteView
                     editor={editor}
                     theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
@@ -94,7 +94,7 @@ export function PasswordEditor({ passwordId, initialContent }: PasswordEditorPro
                 />
             </div>
             {/* 
-              Customizamos o CSS com baixa especificidade para que o texto padrão continue "Hacker Green"
+              Customizamos o CSS com baixa especificidade para que o texto padrão continue "Blue"
               mas permitindo que o BlockNote sobrescreva a cor quando o usuário desejar.
             */}
             <style jsx global>{`
@@ -105,14 +105,14 @@ export function PasswordEditor({ passwordId, initialContent }: PasswordEditorPro
 
                 /* Fonte monospace e cor padrão sem !important, usando pseudo-classe :where para ter peso (0,0,0) na tabela de especificidade CSS */
                 :where(.password-vault-editor .bn-editor [data-content-type="paragraph"]) {
-                    color: #4ade80; /* Tailwind green-400 */
+                    color: #60a5fa; /* Tailwind blue-400 */
                     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 }
                 
                 /* Listas e blocos padrão herdando a mesma fonte */
                 :where(.password-vault-editor .bn-editor [data-content-type="bulletListItem"], 
                        .password-vault-editor .bn-editor [data-content-type="numberedListItem"]) {
-                    color: #4ade80;
+                    color: #60a5fa;
                     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 }
             `}</style>
