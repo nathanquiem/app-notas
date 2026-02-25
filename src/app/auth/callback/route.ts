@@ -11,19 +11,21 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
-            const forwardedHost = request.headers.get('x-forwarded-host')
-            const isLocalEnv = process.env.NODE_ENV === 'development'
+            // Em produção na Vercel, o "origin" da request.url pode vir como o domínio interno da Vercel
+            // O ideal é ler o host real que o usuário acessou
+            const host = request.headers.get('host')
+            const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
 
-            if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${next}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`)
-            } else {
-                return NextResponse.redirect(`${origin}${next}`)
-            }
+            const redirectOrigin = host ? `${protocol}://${host}` : origin
+
+            return NextResponse.redirect(`${redirectOrigin}${next}`)
         }
     }
 
-    // return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/login?error=Invalid_or_expired_recovery_link`)
+    // Se houver erro, redireciona de volta para o login relatando o problema
+    const host = request.headers.get('host')
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+    const redirectOrigin = host ? `${protocol}://${host}` : origin
+
+    return NextResponse.redirect(`${redirectOrigin}/login?error=Invalid_or_expired_recovery_link`)
 }
