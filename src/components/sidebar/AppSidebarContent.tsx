@@ -45,7 +45,7 @@ export function AppSidebarContent({ children }: { children: ReactNode }) {
                 </Link>
             </div>
 
-            <div className="p-4 flex-1 overflow-y-auto space-y-6">
+            <div className="p-4 flex-1 overflow-y-auto overflow-x-hidden no-scrollbar space-y-6">
                 {/* Main Navigation */}
                 <div className="space-y-1">
                     <Link href="/app/dashboard" onClick={closeMobileSidebar} className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg bg-slate-100 dark:bg-slate-800 text-[var(--color-primary)] font-medium transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
