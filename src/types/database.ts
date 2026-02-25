@@ -34,3 +34,28 @@ export type Mindmap = {
     is_favorite: boolean
     is_trashed: boolean
 }
+
+export type FinanceCategory = {
+    id: string
+    name: string
+    color: string
+    user_id: string | null
+    created_at: string
+}
+
+export type TransactionType = 'IN' | 'OUT'
+export type TransactionStatus = 'PAID' | 'PENDING'
+
+export type FinanceTransaction = {
+    id: string
+    user_id: string
+    description: string
+    amount: number
+    type: TransactionType
+    status: TransactionStatus
+    date: string
+    category_id: string | null
+    created_at: string
+    updated_at: string
+}
+
