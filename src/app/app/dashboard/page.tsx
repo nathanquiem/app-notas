@@ -99,7 +99,7 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <div className="col-span-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <div className="col-span-4 rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
                     <h3 className="font-semibold text-lg mb-4">Acesso Recente</h3>
                     <div className="space-y-4">
                         {recentItems.length === 0 ? (
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="col-span-3 rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <div className="col-span-3 rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
                     <h3 className="font-semibold text-lg mb-4">Ações Rápidas</h3>
                     <DashboardActions />
                 </div>
