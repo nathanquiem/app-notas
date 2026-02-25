@@ -62,3 +62,30 @@ export async function deletePermanentlyAction(id: string, entity: EntityType) {
     revalidatePath('/app/lixeira')
     return { success: true }
 }
+
+export async function bulkDeletePermanentlyAction(items: { id: string, entity: EntityType }[]) {
+    const supabase = await createClient()
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return { error: 'Não autorizado' }
+
+    const grouped = items.reduce((acc, curr) => {
+        if (!acc[curr.entity]) acc[curr.entity] = []
+        acc[curr.entity].push(curr.id)
+        return acc
+    }, {} as Record<EntityType, string[]>)
+
+    for (const entity of Object.keys(grouped) as EntityType[]) {
+        const ids = grouped[entity]
+        if (ids.length > 0) {
+            const { error } = await supabase
+                .from(entity)
+                .delete()
+                .in('id', ids)
+                .eq('user_id', userData.user.id)
+            if (error) return { error: error.message }
+        }
+    }
+
+    revalidatePath('/app/lixeira')
+    return { success: true }
+}
