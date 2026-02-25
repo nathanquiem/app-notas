@@ -9,7 +9,7 @@ export default async function NotesServerContainer() {
 
   const { data: notes } = await supabase
     .from('notes')
-    .select('id, title, is_favorite, updated_at')
+    .select('id, title, is_favorite, folder_id, updated_at')
     .eq('is_trashed', false)
     .order('updated_at', { ascending: false })
 

@@ -1,18 +1,22 @@
 "use client"
 
-import { KeyRound, Plus, Clock } from "lucide-react"
+import { KeyRound, Plus, Clock, Star, Folder } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 import { CreatePasswordModal } from "@/components/vault/CreatePasswordModal"
+import { useWorkspaceStore } from "@/store/useWorkspaceStore"
 
 interface PasswordItem {
     id: string
     title: string
+    is_favorite: boolean
+    folder_id: string | null
     updated_at: string
 }
 
 export default function PasswordsIndexClient({ passwords }: { passwords: PasswordItem[] }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const { folders } = useWorkspaceStore()
 
     return (
         <div className="space-y-6 h-full flex flex-col">
@@ -49,17 +53,35 @@ export default function PasswordsIndexClient({ passwords }: { passwords: Passwor
                     </div>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-4">
-                        {passwords.map(pwd => (
-                            <Link href={`/app/senhas/${pwd.id}`} key={pwd.id} className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all hover:border-orange-500/50 dark:hover:border-orange-500/50 cursor-pointer h-32">
-                                <div className="flex items-start justify-between">
-                                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">{pwd.title}</h3>
-                                    <KeyRound size={18} className="text-orange-500 shrink-0 drop-shadow-sm" />
-                                </div>
-                                <div className="mt-4 flex flex-col text-xs text-gray-500 font-medium pt-2 border-t border-border">
-                                    <span className="flex items-center gap-1"><Clock size={12} /> {pwd.updated_at ? new Date(pwd.updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Recente'}</span>
-                                </div>
-                            </Link>
-                        ))}
+                        {passwords.map(pwd => {
+                            const folderName = folders.find(f => f.id === pwd.folder_id)?.name
+                            return (
+                                <Link
+                                    href={`/app/senhas/${pwd.id}`}
+                                    key={pwd.id}
+                                    className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all hover:border-orange-500/50 dark:hover:border-orange-500/50 cursor-pointer h-36"
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">{pwd.title}</h3>
+                                        <KeyRound size={18} className="text-orange-500 shrink-0 drop-shadow-sm ml-2" />
+                                    </div>
+
+                                    <div className="mt-auto mb-3 flex items-center gap-2 flex-wrap">
+                                        {pwd.is_favorite && <Star size={14} className="text-yellow-500 fill-yellow-500 drop-shadow-sm" />}
+                                        {folderName && (
+                                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                                <Folder size={12} className="text-gray-400" />
+                                                <span className="truncate max-w-[100px]">{folderName}</span>
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex flex-col text-xs text-gray-500 font-medium pt-2 border-t border-border">
+                                        <span className="flex items-center gap-1"><Clock size={12} /> {pwd.updated_at ? new Date(pwd.updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Recente'}</span>
+                                    </div>
+                                </Link>
+                            )
+                        })}
                     </div>
                 )}
             </div>

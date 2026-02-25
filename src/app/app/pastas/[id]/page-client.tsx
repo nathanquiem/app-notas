@@ -1,6 +1,6 @@
 "use client"
 
-import { FileText, KeyRound, Folder as FolderIcon, Clock, ChevronRight, MoreHorizontal } from "lucide-react"
+import { FileText, KeyRound, Folder as FolderIcon, Clock, ChevronRight, MoreHorizontal, Star } from "lucide-react"
 import Link from "next/link"
 import { Folder } from "@/types/database"
 import { FolderActionMenu } from "./FolderActionMenu"
@@ -72,12 +72,21 @@ export default function FolderViewClient({
                             </h3>
                             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 {notes.map(note => (
-                                    <Link href={`/app/notas/${note.id}`} key={note.id} className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow hover:border-blue-200 dark:hover:border-blue-900/50 cursor-pointer h-32">
+                                    <Link href={`/app/notas/${note.id}`} key={note.id} className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow hover:border-blue-200 dark:hover:border-blue-900/50 cursor-pointer h-36">
                                         <div className="flex items-start justify-between">
                                             <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">{note.title}</h3>
-                                            <FileText size={18} className="text-blue-500 shrink-0" />
+                                            <FileText size={18} className="text-blue-500 shrink-0 ml-2" />
                                         </div>
-                                        <div className="mt-4 flex flex-col text-xs text-gray-500 font-medium pt-2 border-t border-border">
+
+                                        <div className="mt-auto mb-3 flex items-center gap-2 flex-wrap">
+                                            {note.is_favorite && <Star size={14} className="text-yellow-500 fill-yellow-500 drop-shadow-sm" />}
+                                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                                <FolderIcon size={12} className="text-gray-400" />
+                                                <span className="truncate max-w-[100px]">{folder.name}</span>
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-col text-xs text-gray-500 font-medium pt-2 border-t border-border">
                                             <span className="flex items-center gap-1"><Clock size={12} /> {note.updated_at ? new Date(note.updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Recente'}</span>
                                         </div>
                                     </Link>
@@ -94,12 +103,21 @@ export default function FolderViewClient({
                             </h3>
                             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 {passwords.map(pwd => (
-                                    <Link href={`/app/senhas/${pwd.id}`} key={pwd.id} className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow hover:border-orange-200 dark:hover:border-orange-900/50 cursor-pointer h-32">
+                                    <Link href={`/app/senhas/${pwd.id}`} key={pwd.id} className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow hover:border-orange-200 dark:hover:border-orange-900/50 cursor-pointer h-36">
                                         <div className="flex items-start justify-between">
                                             <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">{pwd.title}</h3>
-                                            <KeyRound size={18} className="text-orange-500 shrink-0" />
+                                            <KeyRound size={18} className="text-orange-500 shrink-0 ml-2" />
                                         </div>
-                                        <div className="mt-4 flex flex-col text-xs text-gray-500 font-medium pt-2 border-t border-border">
+
+                                        <div className="mt-auto mb-3 flex items-center gap-2 flex-wrap">
+                                            {pwd.is_favorite && <Star size={14} className="text-yellow-500 fill-yellow-500 drop-shadow-sm" />}
+                                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                                <FolderIcon size={12} className="text-gray-400" />
+                                                <span className="truncate max-w-[100px]">{folder.name}</span>
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-col text-xs text-gray-500 font-medium pt-2 border-t border-border">
                                             <span className="flex items-center gap-1"><Clock size={12} /> {pwd.updated_at ? new Date(pwd.updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Recente'}</span>
                                         </div>
                                     </Link>

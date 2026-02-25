@@ -10,7 +10,7 @@ export default async function PasswordsServerContainer() {
     // O SC injeta os dados de servidor para o Client Component renderizar o state visual do Modal.
     const { data: passwords } = await supabase
         .from('passwords')
-        .select('id, title, is_favorite, updated_at')
+        .select('id, title, is_favorite, folder_id, updated_at')
         .eq('is_trashed', false)
         .order('created_at', { ascending: false })
 
