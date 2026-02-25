@@ -11,10 +11,13 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
-            // Em produção na Vercel, o "origin" da request.url pode vir como o domínio interno da Vercel
-            // O ideal é ler o host real que o usuário acessou
-            const host = request.headers.get('host')
-            const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+            // Em provedores com Reverse Proxy (como Coolify, Traefik, Nginx), o host real
+            // fica nos headers x-forwarded. O internal host pode ser apenas o IP do Docker ou localhost.
+            const forwardedHost = request.headers.get('x-forwarded-host')
+            const forwardedProto = request.headers.get('x-forwarded-proto')
+
+            const host = forwardedHost ?? request.headers.get('host')
+            const protocol = forwardedProto ?? (process.env.NODE_ENV === 'development' ? 'http' : 'https')
 
             const redirectOrigin = host ? `${protocol}://${host}` : origin
 
@@ -23,8 +26,11 @@ export async function GET(request: Request) {
     }
 
     // Se houver erro, redireciona de volta para o login relatando o problema
-    const host = request.headers.get('host')
-    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+    const forwardedHost = request.headers.get('x-forwarded-host')
+    const forwardedProto = request.headers.get('x-forwarded-proto')
+    const host = forwardedHost ?? request.headers.get('host')
+    const protocol = forwardedProto ?? (process.env.NODE_ENV === 'development' ? 'http' : 'https')
+
     const redirectOrigin = host ? `${protocol}://${host}` : origin
 
     return NextResponse.redirect(`${redirectOrigin}/login?error=Invalid_or_expired_recovery_link`)
