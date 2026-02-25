@@ -44,16 +44,18 @@ export default async function PasswordDetailPage({
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto h-full flex flex-col pt-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                 <div className="max-w-2xl w-full">
                     <div className="flex items-center gap-3">
-                        <Lock className="text-orange-500" size={28} />
-                        <DocumentTitleInput
-                            id={pwd.id}
-                            initialTitle={pwd.title}
-                            entity="passwords"
-                            colorClass="text-orange-600 dark:text-orange-500 focus:border-orange-200"
-                        />
+                        <Lock className="text-orange-500 flex-shrink-0" size={28} />
+                        <div className="flex-1 min-w-0">
+                            <DocumentTitleInput
+                                id={pwd.id}
+                                initialTitle={pwd.title}
+                                entity="passwords"
+                                colorClass="text-orange-600 dark:text-orange-500 focus:border-orange-200"
+                            />
+                        </div>
                     </div>
                     <div className="flex items-center gap-4 text-xs font-medium text-gray-400 mt-2 ml-10">
                         <span className="flex items-center gap-1">
@@ -62,7 +64,7 @@ export default async function PasswordDetailPage({
                         <FolderSelect itemId={pwd.id} currentFolderId={pwd.folder_id} entity="passwords" />
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 self-end md:self-auto">
                     <ShareButton entityId={pwd.id} entityType="passwords" />
                     <FavoriteButton id={pwd.id} entity="passwords" initialIsFavorite={pwd.is_favorite} />
                     <TrashButton id={pwd.id} entity="passwords" />

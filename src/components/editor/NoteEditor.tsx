@@ -71,7 +71,7 @@ export function NoteEditor({ noteId, initialContent }: EditorProps) {
 
     // A UI do BlockNote (renderiza um Notion-like canvas interativo)
     return (
-        <div className="w-full h-full pb-32 flex flex-col">
+        <div className="w-full h-full pb-32 flex flex-col note-vault-editor">
             {/* Indicator Area (Above the Line) */}
             <div className="flex items-center justify-end gap-2 text-xs font-medium text-gray-500 mb-2">
                 {isSaving && <Loader2 size={14} className="animate-spin text-[var(--color-primary)]" />}
@@ -86,6 +86,20 @@ export function NoteEditor({ noteId, initialContent }: EditorProps) {
                 className="min-h-[500px]"
                 onChange={handleEditorChange}
             />
+
+            <style jsx global>{`
+                /* Mobile/Global Override para preencher a tela */
+                .note-vault-editor .ProseMirror {
+                    max-width: 100% !important;
+                    padding-inline: 16px !important;
+                }
+
+                @media (min-width: 768px) {
+                    .note-vault-editor .ProseMirror {
+                        padding-inline: 54px !important;
+                    }
+                }
+            `}</style>
         </div>
     )
 }

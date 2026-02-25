@@ -37,14 +37,18 @@ export default async function NoteDetailPage({
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto h-full flex flex-col pt-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                 <div className="max-w-2xl w-full">
-                    <DocumentTitleInput
-                        id={note.id}
-                        initialTitle={note.title}
-                        entity="notes"
-                        colorClass="text-[var(--color-marine)] dark:text-white focus:border-[var(--color-primary-light)]"
-                    />
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 min-w-0">
+                            <DocumentTitleInput
+                                id={note.id}
+                                initialTitle={note.title}
+                                entity="notes"
+                                colorClass="text-[var(--color-marine)] dark:text-white focus:border-[var(--color-primary-light)]"
+                            />
+                        </div>
+                    </div>
                     <div className="flex items-center gap-4 text-xs font-medium text-gray-500 mt-2">
                         <span className="flex items-center gap-1">
                             <Clock size={14} /> Atualizado: {updatedAt}
@@ -52,7 +56,7 @@ export default async function NoteDetailPage({
                         <FolderSelect itemId={note.id} currentFolderId={note.folder_id} entity="notes" />
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 self-end md:self-auto">
                     <ShareButton entityId={note.id} entityType="notes" />
                     <FavoriteButton id={note.id} entity="notes" initialIsFavorite={note.is_favorite} />
                     <TrashButton id={note.id} entity="notes" />

@@ -103,6 +103,18 @@ export function PasswordEditor({ passwordId, initialContent }: PasswordEditorPro
                     background-color: transparent !important;
                 }
 
+                /* Mobile/Global Override para preencher a tela */
+                .password-vault-editor .ProseMirror {
+                    max-width: 100% !important;
+                    padding-inline: 16px !important;
+                }
+
+                @media (min-width: 768px) {
+                    .password-vault-editor .ProseMirror {
+                        padding-inline: 48px !important;
+                    }
+                }
+
                 /* Fonte monospace e cor padrão sem !important, usando pseudo-classe :where para ter peso (0,0,0) na tabela de especificidade CSS */
                 :where(.password-vault-editor .bn-editor [data-content-type="paragraph"]) {
                     color: #60a5fa; /* Tailwind blue-400 */
