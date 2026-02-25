@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useFinanceStore } from "@/store/useFinanceStore"
-import { Plus, ArrowDownCircle, ArrowUpCircle, Wallet, Calendar, Tags, CheckCircle2, CircleDashed, Trash2, PieChart as PieChartIcon, AlignLeft } from "lucide-react"
+import { Plus, ArrowDownCircle, ArrowUpCircle, Wallet, Calendar, Tags, CheckCircle2, CircleDashed, Trash2, Edit2, PieChart as PieChartIcon, AlignLeft } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { FinanceTransaction } from "@/types/database"
 
@@ -12,6 +12,7 @@ export default function FinanceClientPage() {
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
     const [isAddTxOpen, setIsAddTxOpen] = useState(false)
+    const [transactionToEdit, setTransactionToEdit] = useState<FinanceTransaction | undefined>(undefined)
     const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false)
 
     useEffect(() => {
@@ -153,7 +154,7 @@ export default function FinanceClientPage() {
                             <button onClick={() => setIsCategoryManagerOpen(true)} className="text-xs font-medium px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1 text-gray-600 dark:text-gray-300">
                                 <Tags size={14} /> Categorias
                             </button>
-                            <button onClick={() => setIsAddTxOpen(true)} className="text-xs font-medium px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1 shadow-sm">
+                            <button onClick={() => { setTransactionToEdit(undefined); setIsAddTxOpen(true); }} className="text-xs font-medium px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1 shadow-sm">
                                 <Plus size={14} /> Novo Lançamento
                             </button>
                         </div>
@@ -208,9 +209,14 @@ export default function FinanceClientPage() {
                                                     {t.type === 'IN' ? '+ ' : '- '}R$ {Number(t.amount).toFixed(2).replace('.', ',')}
                                                 </td>
                                                 <td className="px-5 py-4 text-center">
-                                                    <button onClick={() => deleteTransaction(t.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        <button onClick={() => { setTransactionToEdit(t); setIsAddTxOpen(true); }} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" title="Editar">
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                        <button onClick={() => deleteTransaction(t.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" title="Excluir">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )
@@ -224,7 +230,7 @@ export default function FinanceClientPage() {
 
             {/* Modal: Adio Lançamento */}
             {isAddTxOpen && (
-                <AddTransactionModal onClose={() => setIsAddTxOpen(false)} />
+                <AddTransactionModal transactionToEdit={transactionToEdit} onClose={() => setIsAddTxOpen(false)} />
             )}
 
             {/* Modal: Categorias */}
@@ -235,27 +241,36 @@ export default function FinanceClientPage() {
     )
 }
 
-function AddTransactionModal({ onClose }: { onClose: () => void }) {
-    const { categories, createTransaction } = useFinanceStore()
-    const [desc, setDesc] = useState('')
-    const [amount, setAmount] = useState('')
-    const [type, setType] = useState<'IN' | 'OUT'>('OUT')
-    const [status, setStatus] = useState<'PAID' | 'PENDING'>('PAID')
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-    const [catId, setCatId] = useState<string>('')
+function AddTransactionModal({ onClose, transactionToEdit }: { onClose: () => void, transactionToEdit?: FinanceTransaction }) {
+    const { categories, createTransaction, updateTransaction } = useFinanceStore()
+    const [desc, setDesc] = useState(transactionToEdit?.description || '')
+    const [amount, setAmount] = useState(transactionToEdit ? String(transactionToEdit.amount) : '')
+    const [type, setType] = useState<'IN' | 'OUT'>(transactionToEdit?.type || 'OUT')
+    const [status, setStatus] = useState<'PAID' | 'PENDING'>(transactionToEdit?.status || 'PAID')
+    const [date, setDate] = useState(transactionToEdit?.date || new Date().toISOString().split('T')[0])
+    const [catId, setCatId] = useState<string>(transactionToEdit?.category_id || '')
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        const ok = await createTransaction({
+
+        const txData = {
             description: desc,
             amount: Number(amount.replace(',', '.')),
             type,
             status,
             date,
             category_id: catId || null
-        })
+        }
+
+        let ok = false
+        if (transactionToEdit) {
+            ok = await updateTransaction(transactionToEdit.id, txData)
+        } else {
+            ok = await createTransaction(txData)
+        }
+
         if (ok) {
             onClose()
             // Recarrega os dados pra forçar att visual exata
@@ -267,7 +282,7 @@ function AddTransactionModal({ onClose }: { onClose: () => void }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-border text-lg font-bold">Novo Lançamento</div>
+                <div className="p-4 border-b border-border text-lg font-bold">{transactionToEdit ? 'Editar Lançamento' : 'Novo Lançamento'}</div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
 
                     <div className="grid grid-cols-2 gap-4">
@@ -322,18 +337,39 @@ function AddTransactionModal({ onClose }: { onClose: () => void }) {
 }
 
 function CategoryManagerModal({ onClose }: { onClose: () => void }) {
-    const { categories, createCategory, deleteCategory } = useFinanceStore()
+    const { categories, createCategory, updateCategory, deleteCategory } = useFinanceStore()
     const [name, setName] = useState('')
     const [color, setColor] = useState('#3b82f6')
     const [loading, setLoading] = useState(false)
+    const [categoryToEdit, setCategoryToEdit] = useState<string | null>(null)
 
-    const handleAdd = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!name.trim()) return
         setLoading(true)
-        await createCategory(name, color)
+
+        if (categoryToEdit) {
+            await updateCategory(categoryToEdit, name, color)
+            setCategoryToEdit(null)
+        } else {
+            await createCategory(name, color)
+        }
+
         setName('')
+        setColor('#3b82f6')
         setLoading(false)
+    }
+
+    const startEdit = (id: string, currentName: string, currentColor: string) => {
+        setCategoryToEdit(id)
+        setName(currentName)
+        setColor(currentColor)
+    }
+
+    const cancelEdit = () => {
+        setCategoryToEdit(null)
+        setName('')
+        setColor('#3b82f6')
     }
 
     return (
@@ -353,20 +389,31 @@ function CategoryManagerModal({ onClose }: { onClose: () => void }) {
                                 <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: c.color }} />
                                 <span className="font-medium text-sm">{c.name}</span>
                             </div>
-                            <button onClick={() => deleteCategory(c.id)} className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" title="Excluir">
-                                <Trash2 size={14} />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                <button onClick={() => startEdit(c.id, c.name, c.color)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" title="Editar">
+                                    <Edit2 size={14} />
+                                </button>
+                                <button onClick={() => deleteCategory(c.id)} className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" title="Excluir">
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Nova Cat */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-border">
-                    <form onSubmit={handleAdd} className="flex gap-2 items-center">
+                {/* Nova / Editar Cat */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-border flex flex-col gap-2">
+                    {categoryToEdit && (
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-semibold text-blue-500">Editando Categoria</span>
+                            <button onClick={cancelEdit} className="text-xs text-gray-500 hover:text-gray-700 underline">Cancelar</button>
+                        </div>
+                    )}
+                    <form onSubmit={handleSubmit} className="flex gap-2 items-center">
                         <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" title="Cor" />
-                        <input required value={name} onChange={e => setName(e.target.value)} type="text" className="flex-1 bg-white dark:bg-slate-800 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nova Categoria..." />
+                        <input required value={name} onChange={e => setName(e.target.value)} type="text" className="flex-1 bg-white dark:bg-slate-800 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={categoryToEdit ? "Nome da Categoria" : "Nova Categoria..."} />
                         <button disabled={loading} type="submit" className="p-1.5 bg-blue-600 text-white hover:bg-blue-700 transition-colors rounded-lg shadow-sm disabled:opacity-50">
-                            <Plus size={18} />
+                            {categoryToEdit ? <CheckCircle2 size={18} /> : <Plus size={18} />}
                         </button>
                     </form>
                 </div>

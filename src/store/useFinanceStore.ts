@@ -5,8 +5,10 @@ import {
     createTransactionAction,
     updateTransactionStatusAction,
     deleteTransactionAction,
+    updateTransactionAction, // new
     createCategoryAction,
-    deleteCategoryAction
+    deleteCategoryAction,
+    updateCategoryAction // new
 } from '@/app/actions/finance'
 
 interface FinanceState {
@@ -19,10 +21,12 @@ interface FinanceState {
     // Actions
     fetchInitialData: (month: number, year: number) => Promise<void>
     createTransaction: (data: Omit<FinanceTransaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<boolean>
+    updateTransaction: (id: string, data: Omit<FinanceTransaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<boolean>
     toggleTransactionStatus: (id: string, currentStatus: 'PAID' | 'PENDING') => Promise<boolean>
     deleteTransaction: (id: string) => Promise<boolean>
 
     createCategory: (name: string, color: string) => Promise<boolean>
+    updateCategory: (id: string, name: string, color: string) => Promise<boolean>
     deleteCategory: (id: string) => Promise<boolean>
 }
 
@@ -75,10 +79,15 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             set({ error: res.error })
             return false
         }
+        return true
+    },
 
-        // Em vez de recarregar tudo com fetchInitialData (que gasta BD), poderíamos inserir no array otimista.
-        // Simulando otimismo: 
-        // (Mas para simplificar e garantir precisão do ID/Data local, faremos refetch via Componente ou Store).
+    updateTransaction: async (id, data) => {
+        const res = await updateTransactionAction(id, data)
+        if (res.error) {
+            set({ error: res.error })
+            return false
+        }
         return true
     },
 
@@ -124,6 +133,20 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         // Atualiza a lista
         set(state => ({
             categories: [...state.categories, res.category as FinanceCategory].sort((a, b) => a.name.localeCompare(b.name))
+        }))
+        return true
+    },
+
+    updateCategory: async (id, name, color) => {
+        const res = await updateCategoryAction(id, { name, color })
+        if (res.error || !res.category) {
+            set({ error: res.error || 'Erro ao atualizar (Talvez seja uma categoria padrão não-editável)' })
+            return false
+        }
+
+        // Atualiza a lista localmente
+        set(state => ({
+            categories: state.categories.map(c => c.id === id ? res.category as FinanceCategory : c).sort((a, b) => a.name.localeCompare(b.name))
         }))
         return true
     },

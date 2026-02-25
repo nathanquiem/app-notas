@@ -103,3 +103,52 @@ export async function deleteCategoryAction(id: string) {
     if (error) return { error: error.message }
     return { success: true }
 }
+
+export async function updateTransactionAction(id: string, data: {
+    description: string
+    amount: number
+    type: TransactionType
+    status: TransactionStatus
+    date: string
+    category_id: string | null
+}) {
+    const supabase = await createClient()
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return { error: 'Não autorizado' }
+
+    const { error } = await supabase
+        .from('finance_transactions')
+        .update({
+            ...data,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('user_id', userData.user.id) // Reforço RLS
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/app/financas')
+    return { success: true }
+}
+
+export async function updateCategoryAction(id: string, data: { name: string, color: string }) {
+    const supabase = await createClient()
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return { error: 'Não autorizado' }
+
+    const { data: updatedCategory, error } = await supabase
+        .from('finance_categories')
+        .update({
+            name: data.name,
+            color: data.color
+        })
+        .eq('id', id)
+        .eq('user_id', userData.user.id) // Reforço RLS. Categorias Default tem user=null, logo não editará.
+        .select('*')
+        .single()
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/app/financas')
+    return { success: true, category: updatedCategory }
+}
