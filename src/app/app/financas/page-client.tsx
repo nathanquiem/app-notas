@@ -1,19 +1,34 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, Suspense } from "react"
 import { useFinanceStore } from "@/store/useFinanceStore"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Plus, ArrowDownCircle, ArrowUpCircle, Wallet, Calendar, Tags, CheckCircle2, CircleDashed, Trash2, Edit2, PieChart as PieChartIcon, AlignLeft } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { FinanceTransaction } from "@/types/database"
 
-export default function FinanceClientPage() {
+function FinanceClientContent() {
     const { transactions, categories, isLoading, fetchInitialData, toggleTransactionStatus, deleteTransaction } = useFinanceStore()
+    const searchParams = useSearchParams()
+    const router = useRouter()
+
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
     const [isAddTxOpen, setIsAddTxOpen] = useState(false)
+    const [initialTxType, setInitialTxType] = useState<'IN' | 'OUT' | undefined>(undefined)
     const [transactionToEdit, setTransactionToEdit] = useState<FinanceTransaction | undefined>(undefined)
     const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false)
+
+    useEffect(() => {
+        const action = searchParams.get('action')
+        if (action === 'income' || action === 'expense') {
+            setInitialTxType(action === 'income' ? 'IN' : 'OUT')
+            setTransactionToEdit(undefined)
+            setIsAddTxOpen(true)
+            router.replace('/app/financas') // limpa a url
+        }
+    }, [searchParams, router])
 
     useEffect(() => {
         fetchInitialData(currentMonth, currentYear)
@@ -230,7 +245,7 @@ export default function FinanceClientPage() {
 
             {/* Modal: Adio Lançamento */}
             {isAddTxOpen && (
-                <AddTransactionModal transactionToEdit={transactionToEdit} onClose={() => setIsAddTxOpen(false)} />
+                <AddTransactionModal initialTxType={initialTxType} transactionToEdit={transactionToEdit} onClose={() => setIsAddTxOpen(false)} />
             )}
 
             {/* Modal: Categorias */}
@@ -241,11 +256,11 @@ export default function FinanceClientPage() {
     )
 }
 
-function AddTransactionModal({ onClose, transactionToEdit }: { onClose: () => void, transactionToEdit?: FinanceTransaction }) {
+function AddTransactionModal({ onClose, transactionToEdit, initialTxType }: { onClose: () => void, transactionToEdit?: FinanceTransaction, initialTxType?: 'IN' | 'OUT' }) {
     const { categories, createTransaction, updateTransaction } = useFinanceStore()
     const [desc, setDesc] = useState(transactionToEdit?.description || '')
     const [amount, setAmount] = useState(transactionToEdit ? String(transactionToEdit.amount) : '')
-    const [type, setType] = useState<'IN' | 'OUT'>(transactionToEdit?.type || 'OUT')
+    const [type, setType] = useState<'IN' | 'OUT'>(transactionToEdit?.type || initialTxType || 'OUT')
     const [status, setStatus] = useState<'PAID' | 'PENDING'>(transactionToEdit?.status || 'PAID')
     const [date, setDate] = useState(transactionToEdit?.date || new Date().toISOString().split('T')[0])
     const [catId, setCatId] = useState<string>(transactionToEdit?.category_id || '')
@@ -419,5 +434,13 @@ function CategoryManagerModal({ onClose }: { onClose: () => void }) {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function FinanceClientPage() {
+    return (
+        <Suspense fallback={<div className="p-10 flex justify-center"><CircleDashed className="animate-spin text-blue-500" /></div>}>
+            <FinanceClientContent />
+        </Suspense>
     )
 }
