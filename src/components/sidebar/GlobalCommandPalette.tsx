@@ -88,13 +88,13 @@ export function GlobalCommandPalette() {
                         <Command.Group heading="Ações Rápidas" className="text-[10px] font-semibold text-gray-400 p-2 uppercase tracking-wide">
                             <Command.Item
                                 onSelect={() => runCommand(() => router.push('/app/notas'))}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                             >
                                 <FileText size={16} /> Nova Nota
                             </Command.Item>
                             <Command.Item
                                 onSelect={() => runCommand(() => router.push('/app/senhas'))}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                             >
                                 <KeyRound size={16} /> Novo Documento Seguro
                             </Command.Item>
@@ -107,7 +107,7 @@ export function GlobalCommandPalette() {
                                         key={folder.id}
                                         value={`pasta ${folder.name}`}
                                         onSelect={() => runCommand(() => router.push(`/app/pastas/${folder.id}`))}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                                     >
                                         <Folder size={16} /> {folder.name}
                                     </Command.Item>
@@ -122,7 +122,7 @@ export function GlobalCommandPalette() {
                                         key={note.id}
                                         value={`nota ${note.title || 'sem titulo'}`}
                                         onSelect={() => runCommand(() => router.push(`/app/notas/${note.id}`))}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                                     >
                                         <FileText size={16} /> {note.title || 'Nota sem título'}
                                     </Command.Item>
@@ -137,7 +137,7 @@ export function GlobalCommandPalette() {
                                         key={pwd.id}
                                         value={`senha cofre credencial pass ${pwd.title || 'sem titulo'}`}
                                         onSelect={() => runCommand(() => router.push(`/app/senhas/${pwd.id}`))}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                                     >
                                         <KeyRound size={16} /> {pwd.title}
                                     </Command.Item>
@@ -148,13 +148,13 @@ export function GlobalCommandPalette() {
                         <Command.Group heading="Configurações & Workspace" className="text-[10px] font-semibold text-gray-400 p-2 uppercase tracking-wide mt-1">
                             <Command.Item
                                 onSelect={() => runCommand(() => router.push('/app/configuracoes'))}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                             >
                                 <Settings size={16} /> Ajustes da Conta
                             </Command.Item>
                             <Command.Item
                                 onSelect={() => runCommand(() => router.push('/app/dashboard'))}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-[var(--color-primary)] aria-selected:text-white transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-pointer aria-selected:bg-slate-200 dark:aria-selected:bg-slate-800 aria-selected:text-foreground transition-colors"
                             >
                                 <Compass size={16} /> Visão Geral (Dashboard)
                             </Command.Item>
