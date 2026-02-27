@@ -9,6 +9,8 @@ import { SharedItemClientWrapper } from "./SharedItemClientWrapper"
 import { SharedItemModalRenderer } from "./SharedItemModalRenderer"
 import { createClient as createAdminClient } from "@supabase/supabase-js"
 
+export const dynamic = 'force-dynamic'
+
 export default async function SharedItemPage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = await params
 
@@ -27,6 +29,7 @@ export default async function SharedItemPage({ params }: { params: Promise<{ tok
         .single()
 
     if (linkError || !link) {
+        if (linkError) console.error("Error fetching shared link:", linkError)
         notFound()
     }
 
