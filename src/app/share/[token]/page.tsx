@@ -16,10 +16,14 @@ export default async function SharedItemPage({ params }: { params: Promise<{ tok
 
     // Conecta como ADMIN (Bypassa o RLS) para que acessos públicos (sem auth.uid()) 
     // consigam carregar o link compartilhado.
-    const supabaseAdmin = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    console.log("[share] token:", token)
+    console.log("[share] SUPABASE_URL set:", !!supabaseUrl)
+    console.log("[share] SERVICE_ROLE_KEY set:", !!supabaseServiceKey)
+
+    const supabaseAdmin = createAdminClient(supabaseUrl!, supabaseServiceKey!)
 
     // 1. Busca o Token Unico
     const { data: link, error: linkError } = await supabaseAdmin
@@ -28,8 +32,10 @@ export default async function SharedItemPage({ params }: { params: Promise<{ tok
         .eq('token', token)
         .single()
 
+    console.log("[share] link found:", !!link, "error:", linkError?.message ?? null)
+
     if (linkError || !link) {
-        if (linkError) console.error("Error fetching shared link:", linkError)
+        console.error("[share] returning notFound(). linkError:", linkError, "link:", link)
         notFound()
     }
 
