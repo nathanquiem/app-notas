@@ -79,9 +79,24 @@ export default async function SharedItemPage({ params }: { params: Promise<{ tok
 
         if (error || !pwd || pwd.is_trashed) notFound()
 
-        let decryptedContent = "Erro de Descriptografia."
+        let decryptedContent: any = "Erro de Descriptografia."
+        let isBlockNote = false
+
         try {
-            decryptedContent = decryptText(pwd.password_encrypted)
+            const rawDecrypted = decryptText(pwd.password_encrypted)
+            try {
+                // Tenta fazer o parse para ver se é JSON do BlockNote
+                const parsed = JSON.parse(rawDecrypted)
+                if (Array.isArray(parsed)) {
+                    decryptedContent = parsed
+                    isBlockNote = true
+                } else {
+                    decryptedContent = rawDecrypted
+                }
+            } catch (jsonErr) {
+                // Não é JSON, então mantém como string
+                decryptedContent = rawDecrypted
+            }
         } catch (e) {
             // ...
         }
@@ -100,11 +115,17 @@ export default async function SharedItemPage({ params }: { params: Promise<{ tok
                                 <h1 className="text-4xl font-bold text-orange-600 dark:text-orange-500 mb-0">{pwd.title}</h1>
                             </div>
 
-                            <div className="bg-slate-900 border border-slate-700/50 rounded-xl p-6 overflow-x-auto shadow-inner">
-                                <pre className="font-mono text-sm sm:text-base text-green-400 whitespace-pre-wrap break-all">
-                                    {decryptedContent}
-                                </pre>
-                            </div>
+                            {isBlockNote ? (
+                                <div className="prose prose-slate max-w-none">
+                                    <SharedNoteRenderer content={decryptedContent} />
+                                </div>
+                            ) : (
+                                <div className="bg-slate-900 border border-slate-700/50 rounded-xl p-6 overflow-x-auto shadow-inner">
+                                    <pre className="font-mono text-sm sm:text-base text-green-400 whitespace-pre-wrap break-all">
+                                        {decryptedContent as string}
+                                    </pre>
+                                </div>
+                            )}
                         </div>
                     </main>
                 </div>

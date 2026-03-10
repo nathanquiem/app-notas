@@ -51,11 +51,29 @@ export function SharedItemModalRenderer({
                             {type === 'notes' ? (
                                 <SharedNoteRenderer content={content} />
                             ) : (
-                                <div className="bg-slate-900 border border-slate-700/50 rounded-xl p-6 overflow-x-auto shadow-inner">
-                                    <pre className="font-mono text-sm sm:text-base text-green-400 whitespace-pre-wrap break-all">
-                                        {content}
-                                    </pre>
-                                </div>
+                                (() => {
+                                    let isBlockNote = false;
+                                    let parsedContent: any = content;
+                                    try {
+                                        const parsed = JSON.parse(content);
+                                        if (Array.isArray(parsed)) {
+                                            isBlockNote = true;
+                                            parsedContent = parsed;
+                                        }
+                                    } catch (e) {
+                                        // Not valid JSON blocknote
+                                    }
+
+                                    return isBlockNote ? (
+                                        <SharedNoteRenderer content={parsedContent} />
+                                    ) : (
+                                        <div className="bg-slate-900 border border-slate-700/50 rounded-xl p-6 overflow-x-auto shadow-inner">
+                                            <pre className="font-mono text-sm sm:text-base text-green-400 whitespace-pre-wrap break-all">
+                                                {content}
+                                            </pre>
+                                        </div>
+                                    );
+                                })()
                             )}
                         </div>
                     </div>
