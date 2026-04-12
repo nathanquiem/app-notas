@@ -33,50 +33,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') return;
-  
-  // Skip caching for auth requests or Next.js hot reloading
-  if (
-    event.request.url.includes('/api/auth') || 
-    event.request.url.includes('_next/webpack-hmr') ||
-    event.request.url.includes('supabase.co')
-  ) {
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-
-        return fetch(event.request).then(
-          (response) => {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // IMPORTANT: Clone the response. A response is a stream
-            // and because we want the browser to consume the response
-            // as well as the cache consuming the response, we need
-            // to clone it so we have two streams.
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                // Don't cache chrome-extension schemes or non-http
-                if (event.request.url.startsWith('http')) {
-                  cache.put(event.request, responseToCache);
-                }
-              });
-
-            return response;
-          }
-        );
-      })
-  );
+  // Pass-through fetch handler exclusively.
+  // Next.js App Router handles its own caching.
+  // Intercepting HTML and .rsc payloads here can break hydration and cause crashes.
+  return;
 });
